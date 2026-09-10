@@ -1,0 +1,6 @@
+{
+  "name": "PizzaHouse",
+  "description": "Современный Telegram Mini App для доставки горячей пиццы PizzaHouse",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

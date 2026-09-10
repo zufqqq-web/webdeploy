@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дашборд | PizzaHouse Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+    body { background-color: #0c0a09; color: #f5f5f4; min-height: 100vh; padding-bottom: 3rem; }
+    header {
+      background: #1c1917; border-bottom: 1px solid #292524;
+      padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .header-left { display: flex; align-items: center; gap: 2rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.25rem; }
+    .brand-icon { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); padding: 0.35rem 0.5rem; border-radius: 10px; }
+    nav { display: flex; align-items: center; gap: 0.5rem; }
+    nav a {
+      color: #a8a29e; text-decoration: none; font-size: 0.875rem; font-weight: 600;
+      padding: 0.5rem 0.85rem; border-radius: 10px; transition: all 0.2s;
+    }
+    nav a:hover, nav a.active { color: #ffffff; background: #292524; }
+    nav a.active { color: #f59e0b; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-site {
+      background: #292524; color: #d6d3d1; text-decoration: none; padding: 0.45rem 0.85rem;
+      border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: 1px solid #44403c;
+    }
+    .btn-logout {
+      background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 0.45rem 0.85rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; text-decoration: none;
+    }
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .page-title { font-size: 1.75rem; font-weight: 800; color: #ffffff; }
+    .stats-grid { display: grid; grid-cols: 1fr; gap: 1rem; margin-bottom: 2rem; }
+    @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card {
+      background: #1c1917; border: 1px solid #292524; border-radius: 20px;
+      padding: 1.5rem; position: relative; overflow: hidden;
+    }
+    .stat-card-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #a8a29e; margin-bottom: 0.5rem; }
+    .stat-card-value { font-size: 1.85rem; font-weight: 800; color: #ffffff; }
+    .stat-badge {
+      position: absolute; right: 1.25rem; top: 1.25rem; width: 44px; height: 44px;
+      border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+    }
+    .card { background: #1c1917; border: 1px solid #292524; border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .btn-action {
+      background: #f59e0b; color: #0c0a09; text-decoration: none; padding: 0.5rem 1rem;
+      border-radius: 10px; font-weight: 700; font-size: 0.85rem; transition: background 0.2s;
+    }
+    .btn-action:hover { background: #fbbf24; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 0.75rem 1rem; font-size: 0.75rem; text-transform: uppercase; color: #a8a29e; font-weight: 700; border-bottom: 1px solid #292524; }
+    td { padding: 1rem; font-size: 0.875rem; border-bottom: 1px solid #292524; color: #e7e5e4; }
+    tr:last-child td { border-bottom: none; }
+    .status-badge {
+      display: inline-block; padding: 0.25rem 0.65rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .status-expected { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-cooking { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-delivery { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .status-completed { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <a href="/admin" class="brand">
+        <span class="brand-icon">🍕</span>
+        <span>PizzaHouse Admin</span>
+      </a>
+      <nav>
+        <a href="/admin" class="active">Дашборд</a>
+        <a href="/admin/products">Товары</a>
+        <a href="/admin/orders">Заказы</a>
+      </nav>
+    </div>
+    <div class="header-right">
+      <a href="/" target="_blank" class="btn-site">Открыть сайт ↗</a>
+      <a href="/admin/logout" class="btn-logout">Выйти</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <h1 class="page-title">Сводка показателей</h1>
+      <div style="display:flex; gap: 0.5rem;">
+        <a href="/admin/products" class="btn-action">+ Добавить товар</a>
+        <a href="/admin/orders" class="btn-action" style="background:#292524; color:#fff;">Все заказы</a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">📦</div>
+        <div class="stat-card-title">Всего заказов</div>
+        <div class="stat-card-value" id="statOrders">...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">💰</div>
+        <div class="stat-card-title">Общая выручка</div>
+        <div class="stat-card-value" id="statRevenue">...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">🍕</div>
+        <div class="stat-card-title">Активных товаров</div>
+        <div class="stat-card-value" id="statProducts">...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-badge" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">🕒</div>
+        <div class="stat-card-title">В ожидании / готовке</div>
+        <div class="stat-card-value" id="statPending">...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Последние заказы</h2>
+        <a href="/admin/orders" style="color: #f59e0b; text-decoration: none; font-size: 0.85rem; font-weight: 700;">Смотреть все →</a>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Клиент</th>
+              <th>Телефон</th>
+              <th>Источник</th>
+              <th>Сумма</th>
+              <th>Статус</th>
+              <th>Дата</th>
+            </tr>
+          </thead>
+          <tbody id="recentOrdersBody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: #a8a29e; padding: 2rem;">Загрузка данных...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function formatPrice(amount) {
+      return (amount || 0).toLocaleString('ru-RU') + ' сум';
+    }
+
+    const statusMap = {
+      'expected': { text: '🕒 Ожидается', class: 'status-expected' },
+      'cooking': { text: '🍳 Готовится', class: 'status-cooking' },
+      'delivery': { text: '🚚 В доставке', class: 'status-delivery' },
+      'completed': { text: '✅ Выполнен', class: 'status-completed' },
+      'cancelled': { text: '❌ Отменён', class: 'status-cancelled' }
+    };
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/admin/api/stats');
+        if (res.status === 401) {
+          window.location.href = '/admin/login';
+          return;
+        }
+        const data = await res.json();
+        
+        document.getElementById('statOrders').innerText = data.total_orders;
+        document.getElementById('statRevenue').innerText = formatPrice(data.revenue);
+        document.getElementById('statProducts').innerText = data.active_products;
+
+        const pendingCount = (data.status_counts['expected'] || 0) + (data.status_counts['cooking'] || 0);
+        document.getElementById('statPending').innerText = pendingCount;
+
+        const tbody = document.getElementById('recentOrdersBody');
+        if (!data.recent_orders || data.recent_orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #a8a29e; padding: 2rem;">Заказов пока нет</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.recent_orders.map(order => {
+          const st = statusMap[order.status] || { text: order.status, class: 'status-expected' };
+          return `
+            <tr>
+              <td style="font-weight: 800;">№${order.id}</td>
+              <td>${order.client_name || '—'}</td>
+              <td><a href="tel:${order.phone}" style="color: #93c5fd; text-decoration: none;">${order.phone || '—'}</a></td>
+              <td><span style="font-size:0.75rem; color:#a8a29e;">${order.source || '—'}</span></td>
+              <td style="font-weight: 700; color: #f59e0b;">${formatPrice(order.total)}</td>
+              <td><span class="status-badge ${st.class}">${st.text}</span></td>
+              <td style="color:#a8a29e; font-size:0.8rem;">${order.created_at || '—'}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Ошибка загрузки данных дашборда', err);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

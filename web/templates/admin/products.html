@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление товарами | PizzaHouse Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+    body { background-color: #0c0a09; color: #f5f5f4; min-height: 100vh; padding-bottom: 3rem; }
+    header {
+      background: #1c1917; border-bottom: 1px solid #292524;
+      padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .header-left { display: flex; align-items: center; gap: 2rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.25rem; }
+    .brand-icon { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); padding: 0.35rem 0.5rem; border-radius: 10px; }
+    nav { display: flex; align-items: center; gap: 0.5rem; }
+    nav a {
+      color: #a8a29e; text-decoration: none; font-size: 0.875rem; font-weight: 600;
+      padding: 0.5rem 0.85rem; border-radius: 10px; transition: all 0.2s;
+    }
+    nav a:hover, nav a.active { color: #ffffff; background: #292524; }
+    nav a.active { color: #f59e0b; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-site {
+      background: #292524; color: #d6d3d1; text-decoration: none; padding: 0.45rem 0.85rem;
+      border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: 1px solid #44403c;
+    }
+    .btn-logout {
+      background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 0.45rem 0.85rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; text-decoration: none;
+    }
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-title { font-size: 1.75rem; font-weight: 800; color: #ffffff; }
+    .btn-primary {
+      background: #f59e0b; color: #0c0a09; border: none; padding: 0.65rem 1.25rem;
+      border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #fbbf24; transform: translateY(-1px); }
+    .filter-bar {
+      display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem;
+    }
+    .filter-btn {
+      background: #1c1917; border: 1px solid #292524; color: #a8a29e; padding: 0.5rem 1rem;
+      border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .filter-btn:hover, .filter-btn.active { color: #fff; background: #292524; border-color: #f59e0b; }
+    .card { background: #1c1917; border: 1px solid #292524; border-radius: 20px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 0.85rem 1rem; font-size: 0.75rem; text-transform: uppercase; color: #a8a29e; font-weight: 700; border-bottom: 1px solid #292524; }
+    td { padding: 1rem; font-size: 0.875rem; border-bottom: 1px solid #292524; color: #e7e5e4; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .product-img { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; background: #292524; }
+    .status-pill {
+      display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .status-active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-inactive { background: rgba(120, 113, 108, 0.2); color: #a8a29e; border: 1px solid #44403c; }
+    .action-btns { display: flex; gap: 0.5rem; }
+    .btn-sm {
+      padding: 0.35rem 0.65rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700;
+      border: 1px solid transparent; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-edit { background: #292524; color: #f59e0b; border-color: #44403c; }
+    .btn-edit:hover { background: #44403c; color: #fbbf24; }
+    .btn-toggle { background: #292524; color: #a8a29e; border-color: #44403c; }
+    .btn-toggle:hover { color: #fff; background: #44403c; }
+    .btn-del { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+    .btn-del:hover { background: rgba(239, 68, 68, 0.3); }
+    
+    /* Modal */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-content {
+      background: #1c1917; border: 1px solid #292524; border-radius: 24px;
+      width: 100%; max-width: 540px; padding: 2rem; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-title { font-size: 1.25rem; font-weight: 800; color: #fff; }
+    .btn-close { background: none; border: none; color: #a8a29e; font-size: 1.5rem; cursor: pointer; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #d6d3d1; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; background: #292524; border: 1px solid #44403c; border-radius: 10px;
+      padding: 0.65rem 0.85rem; color: #fff; font-size: 0.875rem; outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #f59e0b; }
+    .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <a href="/admin" class="brand">
+        <span class="brand-icon">🍕</span>
+        <span>PizzaHouse Admin</span>
+      </a>
+      <nav>
+        <a href="/admin">Дашборд</a>
+        <a href="/admin/products" class="active">Товары</a>
+        <a href="/admin/orders">Заказы</a>
+      </nav>
+    </div>
+    <div class="header-right">
+      <a href="/" target="_blank" class="btn-site">Открыть сайт ↗</a>
+      <a href="/admin/logout" class="btn-logout">Выйти</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Каталог товаров</h1>
+        <p style="color: #a8a29e; font-size: 0.85rem; margin-top: 0.25rem;">
+          Все изменения автоматически синхронизируются с Telegram-ботом и сайтом
+        </p>
+      </div>
+      <button class="btn-primary" onclick="openAddModal()">+ Добавить товар</button>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setCategory('all', this)">Все категории</button>
+      <button class="filter-btn" onclick="setCategory('pizza', this)">🍕 Пиццы</button>
+      <button class="filter-btn" onclick="setCategory('combo', this)">🍔 Комбо</button>
+      <button class="filter-btn" onclick="setCategory('drinks', this)">🥤 Напитки</button>
+      <button class="filter-btn" onclick="setCategory('desserts', this)">🍰 Десерты</button>
+      <button class="filter-btn" onclick="setCategory('other', this)">📦 Прочее</button>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Фото</th>
+              <th>Название и состав</th>
+              <th>Категория</th>
+              <th>Цены (25 / 30 / 35 см)</th>
+              <th>Статус</th>
+              <th style="text-align: right;">Действия</th>
+            </tr>
+          </thead>
+          <tbody id="productsBody">
+            <tr><td colspan="7" style="text-align: center; color: #a8a29e; padding: 2rem;">Загрузка товаров...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add / Edit Modal -->
+  <div id="productModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">Добавить товар</h3>
+        <button class="btn-close" onclick="closeModal()">✕</button>
+      </div>
+      <form id="productForm" onsubmit="handleSaveProduct(event)">
+        <input type="hidden" id="prodId" value="">
+        <div class="form-group">
+          <label>Название товара *</label>
+          <input type="text" id="prodName" required placeholder="Например: Пепперони">
+        </div>
+        <div class="form-group">
+          <label>Категория *</label>
+          <select id="prodCategory" required>
+            <option value="pizza">🍕 Пиццы</option>
+            <option value="combo">🍔 Комбо</option>
+            <option value="drinks">🥤 Напитки</option>
+            <option value="desserts">🍰 Десерты</option>
+            <option value="other">📦 Прочее</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Описание</label>
+          <textarea id="prodDescription" rows="2" placeholder="Краткое описание товара"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ингредиенты (через запятую)</label>
+          <input type="text" id="prodIngredients" placeholder="моцарелла, томатный соус, колбаса">
+        </div>
+        <div class="form-group">
+          <label>Ссылка на фото (URL)</label>
+          <input type="url" id="prodImage" placeholder="https://example.com/pizza.jpg">
+        </div>
+        <div class="form-group">
+          <label>Цены в сумах (25 см / 30 см / 35 см) *</label>
+          <div class="price-grid">
+            <input type="number" id="prodPrice25" required placeholder="25 см">
+            <input type="number" id="prodPrice30" required placeholder="30 см">
+            <input type="number" id="prodPrice35" required placeholder="35 см">
+          </div>
+        </div>
+        <div class="form-group" id="activeToggleGroup" style="display:none; margin-top: 1rem;">
+          <label style="display:flex; align-items:center; gap: 0.5rem; cursor:pointer;">
+            <input type="checkbox" id="prodIsActive" style="width: auto;" checked>
+            <span>Отображать товар в меню (активен)</span>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-sm" style="background:#292524; color:#fff; padding:0.65rem 1rem;" onclick="closeModal()">Отмена</button>
+          <button type="submit" class="btn-primary" style="padding:0.65rem 1.25rem;">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let allProducts = [];
+    let currentCategory = 'all';
+
+    function formatPrice(amount) {
+      return (amount || 0).toLocaleString('ru-RU') + ' сум';
+    }
+
+    const catLabels = {
+      'pizza': '🍕 Пицца',
+      'combo': '🍔 Комбо',
+      'drinks': '🥤 Напитки',
+      'desserts': '🍰 Десерты',
+      'other': '📦 Прочее'
+    };
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/admin/api/products');
+        if (res.status === 401) {
+          window.location.href = '/admin/login';
+          return;
+        }
+        allProducts = await res.json();
+        renderProducts();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function setCategory(cat, btn) {
+      currentCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const tbody = document.getElementById('productsBody');
+      const filtered = currentCategory === 'all' 
+        ? allProducts 
+        : allProducts.filter(p => p.category === currentCategory);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #a8a29e; padding: 2rem;">Товары не найдены</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => `
+        <tr>
+          <td style="font-weight: 800; color: #a8a29e;">#${p.id}</td>
+          <td>
+            <img src="${p.image || 'https://placehold.co/100x100?text=No+Photo'}" class="product-img" onerror="this.src='https://placehold.co/100x100?text=No+Photo'">
+          </td>
+          <td>
+            <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">${p.name}</div>
+            <div style="font-size: 0.75rem; color: #a8a29e; max-width: 280px; margin-top: 0.25rem;">
+              ${(p.ingredients || []).join(', ') || p.description || '—'}
+            </div>
+          </td>
+          <td><span style="font-size: 0.8rem; color: #d6d3d1;">${catLabels[p.category] || p.category}</span></td>
+          <td style="font-size: 0.8rem;">
+            <div>25 см: <strong style="color: #f59e0b;">${formatPrice(p.price_25)}</strong></div>
+            <div>30 см: <strong style="color: #f59e0b;">${formatPrice(p.price_30)}</strong></div>
+            <div>35 см: <strong style="color: #f59e0b;">${formatPrice(p.price_35)}</strong></div>
+          </td>
+          <td>
+            <span class="status-pill ${p.is_active ? 'status-active' : 'status-inactive'}">
+              ${p.is_active ? '● Активен' : '○ Скрыт'}
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <div class="action-btns" style="justify-content: flex-end;">
+              <button class="btn-sm btn-edit" onclick='openEditModal(${JSON.stringify(p)})'>Изменить</button>
+              <button class="btn-sm btn-toggle" onclick="toggleActive(${p.id}, ${!p.is_active})">
+                ${p.is_active ? 'Скрыть' : 'Показать'}
+              </button>
+              <button class="btn-sm btn-del" onclick="deleteProduct(${p.id}, '${p.name}')">Удалить</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').innerText = 'Добавить новый товар';
+      document.getElementById('prodId').value = '';
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodCategory').value = 'pizza';
+      document.getElementById('prodDescription').value = '';
+      document.getElementById('prodIngredients').value = '';
+      document.getElementById('prodImage').value = '';
+      document.getElementById('prodPrice25').value = '';
+      document.getElementById('prodPrice30').value = '';
+      document.getElementById('prodPrice35').value = '';
+      document.getElementById('activeToggleGroup').style.display = 'none';
+      document.getElementById('productModal').style.display = 'flex';
+    }
+
+    function openEditModal(prod) {
+      document.getElementById('modalTitle').innerText = 'Редактировать товар #' + prod.id;
+      document.getElementById('prodId').value = prod.id;
+      document.getElementById('prodName').value = prod.name || '';
+      document.getElementById('prodCategory').value = prod.category || 'pizza';
+      document.getElementById('prodDescription').value = prod.description || '';
+      document.getElementById('prodIngredients').value = (prod.ingredients || []).join(', ');
+      document.getElementById('prodImage').value = prod.image || '';
+      document.getElementById('prodPrice25').value = prod.price_25 || '';
+      document.getElementById('prodPrice30').value = prod.price_30 || '';
+      document.getElementById('prodPrice35').value = prod.price_35 || '';
+      document.getElementById('prodIsActive').checked = Boolean(prod.is_active);
+      document.getElementById('activeToggleGroup').style.display = 'block';
+      document.getElementById('productModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('productModal').style.display = 'none';
+    }
+
+    async function handleSaveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prodId').value;
+      const payload = {
+        name: document.getElementById('prodName').value,
+        category: document.getElementById('prodCategory').value,
+        description: document.getElementById('prodDescription').value,
+        ingredients: document.getElementById('prodIngredients').value.split(',').map(s => s.strip ? s.strip() : s.trim()).filter(Boolean),
+        image: document.getElementById('prodImage').value,
+        price_25: parseInt(document.getElementById('prodPrice25').value) || 0,
+        price_30: parseInt(document.getElementById('prodPrice30').value) || 0,
+        price_35: parseInt(document.getElementById('prodPrice35').value) || 0,
+      };
+
+      if (id) {
+        payload.is_active = document.getElementById('prodIsActive').checked;
+      }
+
+      try {
+        const url = id ? `/admin/api/products/${id}` : '/admin/api/products';
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          closeModal();
+          await loadProducts();
+        } else {
+          alert('Ошибка при сохранении товара');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Ошибка связи с сервером');
+      }
+    }
+
+    async function toggleActive(id, newActive) {
+      try {
+        const res = await fetch(`/admin/api/products/${id}/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_active: newActive })
+        });
+        if (res.ok) {
+          await loadProducts();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteProduct(id, name) {
+      if (!confirm(`Вы уверены, что хотите удалить товар «${name}»?`)) return;
+
+      try {
+        const res = await fetch(`/admin/api/products/${id}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          await loadProducts();
+        } else {
+          alert('Не удалось удалить товар');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
